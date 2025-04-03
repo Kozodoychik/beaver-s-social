@@ -1,0 +1,7 @@
+<Files database.db>
+    Require all denied
+</Files>
+
+<Files config.ini>
+    Require all denied
+</Files>
