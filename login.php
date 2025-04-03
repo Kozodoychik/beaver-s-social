@@ -16,10 +16,11 @@
 <html>
     <head>
         <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1"/>
         <title>Вход</title>
         <link rel="stylesheet" href="style.css">
     </head>
-    <body>
+    <body class="login-page">
         <div class="post login-form">
             <form name="loginForm">
                 <input type="hidden" name="action" value="login">
@@ -29,6 +30,7 @@
                 <span class="error" id="login-error"></span>
             </form>
         </div>
+        <p>или</p>
         <div class="post login-form">
             <form name="registerForm">
                 <input type="hidden" name="action" value="register">

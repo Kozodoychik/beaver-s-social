@@ -11,56 +11,25 @@
 }
 
 html {
-    height: 100vh;
     font-family: sans-serif;
 }
 
 html, body {
+    height: 100vh;
     margin: 0;
     background-color: var(--bg-color);
 }
 
-textarea {
-    resize: none;
-}
-
-body {
-    margin-top: 70px;
-
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 15px;
-}
-
-.nav-panel, .sections {
-    background-color: var(--box-color);
-    border-radius: 10px;
-    width: 10vw;
-
-    position: sticky;
-    top: 70px;
-}
-
-.posts {
-    width: 40vw;
-    padding-inline: 50px;
-
+.login-page {
+    margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    align-items: center;
+    justify-content: center;
 }
 
-.post, .nav-panel, .sections {
-    border: solid var(--border-color) 1px;
-    box-shadow: 0px 5px 10px var(--shadow-color);
-}
-
-.post {
-    padding: 10px;
-    background-color: var(--box-color);
-    border-radius: 15px;
+textarea {
+    resize: none;
 }
 
 .user-info {
@@ -97,6 +66,26 @@ body {
     padding: 0;
 }
 
+.post-user-nickname {
+    font-weight: 700;
+    color: #000;
+    text-decoration: none;
+}
+
+.post-toolbar button {
+    background-color: var(--box-color);
+    border: none;
+    border-radius: 25px;
+    padding: 5px;
+
+    color: var(--text-color);
+}
+
+.post-toolbar button:hover {
+    cursor: pointer;
+    background-color: var(--btn-hover-color);
+}
+
 .post-header {
     display: flex;
     align-items: center;
@@ -108,16 +97,6 @@ body {
 
 .post-header p {
     margin: 0;
-}
-
-.post-user-nickname {
-    font-weight: 700;
-    color: #000;
-    text-decoration: none;
-}
-
-.post-content {
-    overflow-wrap: anywhere;
 }
 
 #post-form {
@@ -146,29 +125,15 @@ textarea:active {
     display: flex;
 }
 
-.toolbar {
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-}
-
 #post-form button:hover {
     background-color: var(--btn-hover-color);
     cursor: pointer;
 }
 
-.post-toolbar button {
-    background-color: var(--box-color);
-    border: none;
-    border-radius: 25px;
-    padding: 5px;
-
-    color: var(--text-color);
-}
-
-.post-toolbar button:hover {
-    cursor: pointer;
-    background-color: var(--btn-hover-color);
+.toolbar {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
 }
 
 .icon {
@@ -183,41 +148,14 @@ textarea:active {
     vertical-align: middle;
 }
 
+.post-content {
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
 .counter-btn {
     color: var(--text-color);
     font-size: large;
-}
-
-.ellipsis-btn {
-    float: right;
-}
-
-.nav-panel {
-    padding: 10px;
-}
-
-.nav-panel ul {
-    padding: 0;
-    margin: 0;
-}
-
-.nav-panel ul li{
-    display: block;
-}
-
-.nav-panel a {
-    display: block;
-    text-decoration: none;
-    padding: 10px;
-    padding-left: 20px;
-    border-radius: 5px;
-
-    color: var(--text-color);
-}
-
-.nav-panel a:hover {
-    cursor: pointer;
-    background-color: var(--btn-hover-color);
 }
 
 .user-sections-panel {
@@ -264,6 +202,10 @@ input[type="text"]::placeholder, input[type="password"]::placeholder {
     color: var(--text-color);
 }
 
+input[type="text"]:focus, input[type="password"]:focus {
+    outline: solid var(--border-color) 2px;
+}
+
 input[type="submit"] {
     padding: 10px;
     background-color: var(--btn-color);
@@ -280,4 +222,153 @@ input[type="submit"]:hover {
 .error {
     text-align: center;
     color: red;
+}
+
+
+@media screen and (min-width: 900px) {
+
+body {
+    margin-top: 70px;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.nav-panel, .sections {
+    background-color: var(--box-color);
+    border-radius: 10px;
+    width: 10vw;
+
+    position: sticky;
+    top: 70px;
+}
+
+.posts {
+    width: 40vw;
+    padding-inline: 50px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.post, .nav-panel, .sections {
+    border: solid var(--border-color) 1px;
+    box-shadow: 0px 5px 10px var(--shadow-color);
+}
+
+.post {
+    padding: 10px;
+    background-color: var(--box-color);
+    border-radius: 15px;
+}
+
+.ellipsis-btn {
+    float: right;
+}
+
+.nav-panel {
+    padding: 10px;
+}
+
+.nav-panel ul {
+    padding: 0;
+    margin: 0;
+}
+
+.nav-panel ul li{
+    display: block;
+}
+
+.nav-panel a {
+    display: block;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 5px;
+
+    color: var(--text-color);
+}
+
+.nav-panel a:hover {
+    cursor: pointer;
+    background-color: var(--btn-hover-color);
+}
+
+.nav-panel a * {
+    margin-right: 5px;
+}
+
+}
+
+
+@media screen and (max-width: 900px) {
+
+body {
+    margin-left: 40px;
+}
+
+.posts {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    margin-block: 10px;
+}
+
+.post {
+    background-color: var(--box-color);
+    
+    border: solid var(--border-color) 1px;
+    border-radius: 10px;
+    box-shadow: 0px 2px 5px var(--shadow-color);
+
+    padding: 10px;
+    margin-right: 5px;
+}
+
+.nav-panel {
+    background-color: var(--box-color);
+    border-right: solid var(--border-color) 1px;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: auto;
+    height: 100vh;
+    padding: 5px;
+}
+
+.nav-panel ul {
+    padding: 0;
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.icon-small {
+    font-size: x-large;
+    color: var(--text-color);
+    vertical-align: middle;
+}
+
+.nav-label {
+    display: none;
+}
+
+.post-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.login-form {
+    margin-bottom: 10px;
+}
+
+.login-form form {
+    width: 70vw;
+}
+
 }

@@ -10,9 +10,10 @@
     }
 ?>  
 <!DOCTYPE html>
-<html>
+<html lang="ru">
     <head>
         <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1"/>
         <title>ИП по инфе</title>
         <link rel="stylesheet" href="style.css"/>
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -20,15 +21,15 @@
     <body>
         <div class="nav-panel">
             <ul>
-                <?php if (isset($id)) echo '<li><a href="?u=me">Профиль</a></li>'; ?>
-                <li><a href="index.php">Лента</a></li>
+                <?php if (isset($id)) echo '<li><a href="?u=me"><i class="icon-small bx bx-user"></i><span class="nav-label">Профиль</span></a></li>'; ?>
+                <li><a href="index.php"><i class="icon-small bx bx-dock-top"></i><span class="nav-label">Лента</span></a></li>
                 <!--li><a href="#">Настройки</a></li-->
                 <li><?php
                     if (isset($id)) {
-                        echo '<a onclick="logout();">Выход</a>';
+                        echo '<a onclick="logout();"><i class="icon-small bx bx-log-out"></i><span class="nav-label">Выход</span></a>';
                     }
                     else {
-                        echo '<a href="login.php">Вход</a>';
+                        echo '<a href="login.php"><i class="icon-small bx bx-log-in"></i><span class="nav-label">Вход</span></a>';
                     }
                 ?></li>
             </ul>
@@ -62,11 +63,11 @@
                                 <p class="user-name">'.$u["data"]["username"].'</p>
                             </div>
                         </div>
-                        <!--div class="user-sections-panel">
+                        <div class="user-sections-panel">
                             <a class="section-btn-active" href="#">Всё</a>
                             <a href="#">Медиа</a>
                             <a href="#">Всякое</a>
-                        </div-->
+                        </div>
                     </div>
                     ';
                 }
