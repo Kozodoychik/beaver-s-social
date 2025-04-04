@@ -18,8 +18,16 @@
     $q = $db->query("SELECT * FROM `posts` WHERE `author_id`='".$id["user_id"]."' ORDER BY id DESC LIMIT $count OFFSET $from");
     $data = db_fetch_all($q);
     
+    // Прикол: MySQLi возвращает числовые поля как строки
+    foreach ($data as &$post) {
+        $post["id"] = intval($post["id"]);
+        $post["author_id"] = intval($post["author_id"]);
+        $post["likes"] = intval($post["likes"]);
+        $post["dislikes"] = intval($post["dislikes"]);
+    }
+
     $response = [
-        "status" => 0,
+        "status" => $data ? 0 : 1,
         "data" => $data ? $data : array()
     ];
 

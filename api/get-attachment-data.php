@@ -3,28 +3,28 @@
 
     header("Content-Type: application/json");
 
-    $id = strval($_GET["id"]);
+    $attachment = intval($_GET["attachment"]);
 
-    $post_q = $db->query("SELECT * FROM `posts` WHERE id=$id");
-    $post = db_fetch_assoc($post_q);
-    
-    if (!$post) {
+    $query = $db->query("SELECT * FROM `attachments` WHERE id=$attachment");
+    $data = db_fetch_assoc($query);
+
+    if (!$data) {
         $response = [
             "status" => 1
         ];
+
         echo json_encode($response);
         die();
     }
 
     // Прикол: MySQLi возвращает числовые поля как строки
-    $post["id"] = intval($post["id"]);
-    $post["author_id"] = intval($post["author_id"]);
-    $post["likes"] = intval($post["likes"]);
-    $post["dislikes"] = intval($post["dislikes"]);
+    $data["id"] = intval($data["id"]);
+    $data["author_id"] = intval($data["author_id"]);
 
     $response = [
         "status" => 0,
-        "data" => $post
+        "data" => $data
     ];
+
     echo json_encode($response);
 ?>

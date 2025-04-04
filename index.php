@@ -83,6 +83,14 @@
                         <div class="post">
                             <form id="post-form">
                                 <textarea form="post-form" name="content" placeholder="Чем вы хотите поделиться сегодня?" rows="5"></textarea>
+                                <div id="form-attachments" class="file-attachments">
+                                    <div class="file-attachment">
+                                        <i class="icon bx bx-file-blank"></i>
+                                        <span class="file-attachment-name">test.bin</span>
+                                        <span class="file-attachment-size">1 KB</span>
+                                        <span class="file-attachment-type">text/plain</span>
+                                    </div>
+                                </div>
                                 <div class="toolbar">
                                     <button onclick="uploadPost(event);" type="submit"><i class="icon bx bx-right-arrow-alt"></i></button>
                                     <button onclick="addAttachment(event);"><i class="icon bx bx-paperclip"></i></button>
@@ -96,6 +104,10 @@
             ?>
         </div>
         <script>
+            // TODO: Вывести весь этот адовый код в отдельный файл
+
+            var attachmentChunkSize = 8*1024*1024;    // 8 Мб
+
             var urlParams = new URLSearchParams(document.location.search);
             var posts = document.getElementsByClassName("posts")[0];
             var postsContainer = document.getElementsByClassName("posts")[0];
@@ -173,20 +185,38 @@
                 window.location = "?";
             }
 
-            // TODO: Дописать загрузку файла по кусочкам
+
             function addAttachment(e) {
                 e.preventDefault();
+
+                var attachmentsContainer = document.getElementById("form-attachments");
 
                 var fileSelect = document.createElement("input");
                 fileSelect.setAttribute("type", "file");
 
                 fileSelect.addEventListener("change", async (e) => {
-                    apiRequest("upload-attachment-part", {data:fileSelect.files[0]}, "POST", true);
-                    console.log(await fileSelect.files[0]);
+                    var attachmentId = apiRequest("create-attachment", {name: fileSelect.files[0].name, type: fileSelect.files[0].type});
+                    
+                    if (attachmentId.status != 0) return;
+
+                    var file = fileSelect.files[0];
+                    var chunkCount = Math.ceil(file.size / attachmentChunkSize);
+
+                    for (var i = 0; i < chunkCount; i++) {
+                        var offset = i * attachmentChunkSize;
+                        apiRequest("upload-attachment-chunk", {
+                            attachment: attachmentId.attachment, 
+                            data: file.slice(offset, offset + attachmentChunkSize), 
+                            chunk_n: i, 
+                            is_final: + (i == chunkCount-1)
+                        }, 
+                        "POST", true);
+                    }
+
+                    filesToUpload.push(attachmentId.attachment);
                 });
                 
                 fileSelect.click();
-
             }
 
             function uploadPost(e) {
