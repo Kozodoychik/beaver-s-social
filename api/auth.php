@@ -14,7 +14,7 @@
         $session_id = uniqid();
         $q = $db->query("INSERT INTO `sessions` (`id`, `user_id`, `ip`) VALUES ('$session_id', ".$data["id"].", '".$_SERVER["REMOTE_ADDR"]."')");
 
-        setcookie("bred_session", strval($session_id), 0, "/");
+        setcookie("bs_session", strval($session_id), 0, "/");
 
         $response = [
             "status" => 0,

@@ -15,7 +15,7 @@
         die();
     }
 
-    $db->query("DELETE FROM `sessions` WHERE id='".$_COOKIE["bred_session"]."'");
+    $db->query("DELETE FROM `sessions` WHERE id='".$_COOKIE["bs_session"]."'");
 
     $response = [
         "status" => 0

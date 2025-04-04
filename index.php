@@ -1,7 +1,7 @@
 <?php
     include "api/api.php";
 
-    if (isset($_COOKIE["bred_session"])) {
+    if (isset($_COOKIE["bs_session"])) {
         $id = api_request("get-user-by-session", []);
         if ($id["status"] != 0) {
             header("Location: login.php");
@@ -21,9 +21,13 @@
     <body>
         <div class="nav-panel">
             <ul>
-                <?php if (isset($id)) echo '<li><a href="?u=me"><i class="icon-small bx bx-user"></i><span class="nav-label">Профиль</span></a></li>'; ?>
                 <li><a href="index.php"><i class="icon-small bx bx-dock-top"></i><span class="nav-label">Лента</span></a></li>
-                <!--li><a href="#">Настройки</a></li-->
+                <?php 
+                    if (isset($id)){
+                        echo '<li><a href="?u=me"><i class="icon-small bx bx-user"></i><span class="nav-label">Профиль</span></a></li>
+                        <!--li><a href="#"><i class="icon-small bx bx-cog"></i><span class="nav-label">Настройки</span></a></li-->';
+                    }
+                ?>
                 <li><?php
                     if (isset($id)) {
                         echo '<a onclick="logout();"><i class="icon-small bx bx-log-out"></i><span class="nav-label">Выход</span></a>';
@@ -77,11 +81,11 @@
                     if ($_GET["u"] == "me" && isset($id)) {
                         echo '
                         <div class="post">
-                            <form id="post-form" onsubmit="uploadPost(event);">
+                            <form id="post-form">
                                 <textarea form="post-form" name="content" placeholder="Чем вы хотите поделиться сегодня?" rows="5"></textarea>
                                 <div class="toolbar">
-                                    <button type="submit"><i class="icon bx bx-right-arrow-alt"></i></button>
-                                    <!--button><i class="icon bx bx-paperclip"></i></button-->
+                                    <button onclick="uploadPost(event);" type="submit"><i class="icon bx bx-right-arrow-alt"></i></button>
+                                    <button onclick="addAttachment(event);"><i class="icon bx bx-paperclip"></i></button>
                                 </div>
                             </form>
                         </div>
@@ -98,15 +102,30 @@
 
             var likes = [];
             var dislikes = [];
+
+            var filesToUpload = [];
             
-            function apiRequest(method, params, reqMethod="GET") {
+            function apiRequest(method, params, reqMethod="GET", useMultipartFormData=false) {
                 var p = new URLSearchParams(params);
                 var req = new XMLHttpRequest();
                 
                 if (reqMethod == "POST") {
                     req.open(reqMethod, "api/"+method+".php", false);
-                    req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                    req.send(p.toString());
+                    if (useMultipartFormData) {
+                        console.log("using multipart/form-data");
+                        var formData = new FormData();
+                       
+                        for (const [key, data] of Object.entries(params)) {
+                            formData.append(key, data);
+                        }
+
+                        req.send(formData);
+
+                    }
+                    else {
+                        req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                        req.send(p.toString());
+                    }
                 }
                 else {
                     req.open(reqMethod, "api/"+method+".php?"+p.toString(), false);
@@ -140,7 +159,7 @@
                 }
             }
 
-            if (getCookie("bred_session")) {
+            if (getCookie("bs_session")) {
                 var userId = apiRequest("get-user-by-session", {});
                 var user = apiRequest("get-user", {id:userId.user_id});
 
@@ -150,21 +169,40 @@
 
             function logout() {
                 console.log(apiRequest("logout", {}));
-                document.cookie = "bred_session=; Max-Age=0; path=/; domain=" + location.host + ";expires=Thu, 01 Jan 1970 00:00:01 GMT";
+                document.cookie = "bs_session=; Max-Age=0; path=/; domain=" + location.host + ";expires=Thu, 01 Jan 1970 00:00:01 GMT";
                 window.location = "?";
+            }
+
+            // TODO: Дописать загрузку файла по кусочкам
+            function addAttachment(e) {
+                e.preventDefault();
+
+                var fileSelect = document.createElement("input");
+                fileSelect.setAttribute("type", "file");
+
+                fileSelect.addEventListener("change", async (e) => {
+                    apiRequest("upload-attachment-part", {data:fileSelect.files[0]}, "POST", true);
+                    console.log(await fileSelect.files[0]);
+                });
+                
+                fileSelect.click();
+
             }
 
             function uploadPost(e) {
                 var form = document.forms["post-form"];
                 e.preventDefault();
-                apiRequest("upload-post", {content: form.content.value}, "POST");
+
+                if (form.content.value.length == 0) return;
+
+                apiRequest("upload-post", {content: form.content.value}, "POST", true);
 
                 document.location = "?u=me";
                 
             }
 
             function like(id) {
-                if (!getCookie("bred_session")) return;
+                if (!getCookie("bs_session")) return;
 
                 var method = "PUT";
                 if (likes.includes(id)) {
@@ -206,7 +244,7 @@
             }
 
             function dislike(id) {
-                if (!getCookie("bred_session")) return;
+                if (!getCookie("bs_session")) return;
 
                 var method = "PUT";
                 if (dislikes.includes(id)) {
@@ -254,11 +292,11 @@
                 var userPosts = [];
 
                 if (username == "me") {
-                    if (!getCookie("bred_session")) {
+                    if (!getCookie("bs_session")) {
                         document.location = "login.php";
                     }
                     
-                    var sessionId = getCookie("bred_session");
+                    var sessionId = getCookie("bs_session");
                     userId = apiRequest("get-user-by-session", {session: sessionId});
                 }
                 else {

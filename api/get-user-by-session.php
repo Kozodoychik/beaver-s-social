@@ -5,7 +5,7 @@
 
     //var_dump($_COOKIE);
 
-    $session = $_COOKIE["bred_session"];
+    $session = $_COOKIE["bs_session"];
 
     $sessions_q = $db->query("SELECT `user_id` FROM `sessions` WHERE id='$session'");
     $session = db_fetch_assoc($sessions_q);

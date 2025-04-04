@@ -1,9 +1,9 @@
 <?php
     include "api/api.php";
 
-    if (isset($_COOKIE["bred_session"])){
-        //$sessions_q = $db->query("SELECT * FROM `sessions` WHERE `id`='".$_COOKIE["bred_session"]."'");
-        $session = api_request("get-user-by-session", ["session"=>$_COOKIE["bred_session"]]);
+    if (isset($_COOKIE["bs_session"])){
+        //$sessions_q = $db->query("SELECT * FROM `sessions` WHERE `id`='".$_COOKIE["bs_session"]."'");
+        $session = api_request("get-user-by-session", ["session"=>$_COOKIE["bs_session"]]);
         if ($session["status"] == 0) {
             header("Location: index.php");
             die();
@@ -63,7 +63,7 @@
                 response = await req.json();
 
                 if (response.status == 0) {
-                    //document.cookie += "bred_session="+response.session_id+";";
+                    //document.cookie += "bs_session="+response.session_id+";";
                     document.location = "index.php";
                     return;
                 }
@@ -106,7 +106,7 @@
                 response = await req.json();
 
                 if (response.status == 0) {
-                    //document.cookie += "bred_session="+response.session_id+";";
+                    //document.cookie += "bs_session="+response.session_id+";";
                     document.location = "index.php";
                     return;
                 }

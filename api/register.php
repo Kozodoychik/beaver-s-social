@@ -28,7 +28,7 @@
 
     $db->query("INSERT INTO `users` VALUES (NULL, '$username', '$password', '$username', '', '[]', '[]')");
 
-    //setcookie("bred_session", strval($session_id), 0, "/");
+    //setcookie("bs_session", strval($session_id), 0, "/");
     api_request("auth", ["username"=>$username, "password"=>$password], "POST");
 
     $response = [
