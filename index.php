@@ -263,6 +263,17 @@
                 el.remove();
             }
 
+            function downloadAttachment(id) {
+                var attachmentData = apiRequest("get-attachment-data", {attachment: id});
+
+                if (attachmentData.status != 0) return;
+
+                var a = document.createElement("a");
+                a.setAttribute("href", attachmentData.data.path);
+                a.setAttribute("download", attachmentData.data.name);
+                a.click();
+            }
+
             function uploadPost(e) {
                 var form = document.forms["post-form"];
                 e.preventDefault();
@@ -390,7 +401,7 @@
                         var attachment = attachments[j];
                         var attachmentData = apiRequest("get-attachment-data", {attachment: attachment});
                         attachmentsHTML += `
-                        <div class="file-attachment" onclick="window.location = '${attachmentData.data.path}';">
+                        <div class="file-attachment" onclick="downloadAttachment('${attachmentData.data.id}');">
                             <i class="icon bx bx-file-blank"></i>
                             <span class="file-attachment-name">${attachmentData.data.name}</span>
                             <span class="file-attachment-size">${sizeToString(attachmentData.data.size)}</span>
