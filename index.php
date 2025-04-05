@@ -254,6 +254,7 @@
                 fileSelect.click();
             }
 
+            // TODO: Удаление файла с сервера при удалении вложения
             function removeAttachment(id) {
                 var index = filesToUpload.indexOf(id);
                 if (id !== -1) 
