@@ -438,6 +438,22 @@
                     var post = posts[i];
                     var user;
                     var userReq = apiRequest("get-user", {id: post.author_id});
+
+                    var attachments = JSON.parse(post.attachments);
+                    var attachmentsHTML = "";
+
+                    for (var j = 0; j < attachments.length; j++) {
+                        var attachment = attachments[j];
+                        var attachmentData = apiRequest("get-attachment-data", {attachment: attachment});
+                        attachmentsHTML += `
+                        <div class="file-attachment" onclick="downloadAttachment('${attachmentData.data.id}');">
+                            <i class="icon bx bx-file-blank"></i>
+                            <span class="file-attachment-name">${attachmentData.data.name}</span>
+                            <span class="file-attachment-size">${sizeToString(attachmentData.data.size)}</span>
+                            <span class="file-attachment-type">${attachmentData.data.mime_type}</span>
+                        </div>
+                        `;
+                    }
                     
                     if (userReq.status != 0) {
                         user = {
@@ -455,6 +471,9 @@
                             <p class="post-user-name">${user.username}</p>
                         </div>
                         <p class="post-content">${post.content}</p>
+                        <div class="file-attachments">
+                            ${attachmentsHTML}
+                        </div>
                         <div class="post-toolbar">
                             <button id="like-${post.id}" onclick="like(${post.id});" class="counter-btn"><i class="icon-small bx ${likes.includes(post.id) ? "bxs-like" : "bx-like"}"></i> ${post.likes}</button>
                             <button id="dislike-${post.id}" onclick="dislike(${post.id});"class="counter-btn"><i class="icon-small bx ${dislikes.includes(post.id) ? "bxs-dislike" : "bx-dislike"}"></i> ${post.dislikes}</button>
