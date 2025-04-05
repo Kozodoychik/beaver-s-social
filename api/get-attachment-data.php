@@ -20,6 +20,7 @@
     // Прикол: MySQLi возвращает числовые поля как строки
     $data["id"] = intval($data["id"]);
     $data["author_id"] = intval($data["author_id"]);
+    $data["size"] = intval($data["size"]);
 
     $response = [
         "status" => 0,

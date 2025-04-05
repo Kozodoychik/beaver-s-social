@@ -40,6 +40,7 @@
 
         foreach ($chunks as $chunk) {
             fwrite($file, file_get_contents($chunk));
+            unlink($chunk);
         }
 
         fclose($file);

@@ -29,20 +29,21 @@
 
     $name = db_escape_string($_GET["name"]);
     $mime_type = db_escape_string($_GET["type"]);
+    $size = intval($_GET["size"]);
 
     $internal_filename = strval(time());
 
     if ($config["db_use_sqlite3"])
-        $query = $db->query("INSERT INTO `attachments` VALUES (NULL, ".$user["user_id"].", '$mime_type', '$name', '/data/$internal_filename') RETURNING id");
+        $query = $db->query("INSERT INTO `attachments` VALUES (NULL, ".$user["user_id"].", '$mime_type', '$name', $size, '/data/$internal_filename') RETURNING id");
     else
-        $db->query("INSERT INTO `attachments` VALUES (NULL, ".$user["user_id"].", '$mime_type', '$name', '/data/$internal_filename')");
+        $db->query("INSERT INTO `attachments` VALUES (NULL, ".$user["user_id"].", '$mime_type', '$name', $size, '/data/$internal_filename')");
         $query = $db->query("SELECT LAST_INSERT_ID()");
     
     $id = db_fetch_assoc($query);
 
     $response = [
         "status" => 0,
-        "attachment" => $id["LAST_INSERT_ID()"]
+        "attachment" => intval($id["LAST_INSERT_ID()"])
     ];
 
     echo json_encode($response);

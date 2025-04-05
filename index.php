@@ -84,12 +84,6 @@
                             <form id="post-form">
                                 <textarea form="post-form" name="content" placeholder="Чем вы хотите поделиться сегодня?" rows="5"></textarea>
                                 <div id="form-attachments" class="file-attachments">
-                                    <div class="file-attachment">
-                                        <i class="icon bx bx-file-blank"></i>
-                                        <span class="file-attachment-name">test.bin</span>
-                                        <span class="file-attachment-size">1 KB</span>
-                                        <span class="file-attachment-type">text/plain</span>
-                                    </div>
                                 </div>
                                 <div class="toolbar">
                                     <button onclick="uploadPost(event);" type="submit"><i class="icon bx bx-right-arrow-alt"></i></button>
@@ -185,6 +179,27 @@
                 window.location = "?";
             }
 
+            function sizeToString(size) {
+                if (size < 1024) {
+                    return `${size.toFixed(2)} Б`;
+                }
+                
+                size /= 1024;
+
+                if (size < 1024) {
+                    return `${size.toFixed(2)} Кб`;
+                }
+
+                size /= 1024;
+
+                if (size < 1024) {
+                    return `${size.toFixed(2)} Мб`;
+                }
+
+                size /= 1024;
+
+                return `${size.toFixed(2)} Гб`;
+            }
 
             function addAttachment(e) {
                 e.preventDefault();
@@ -195,9 +210,25 @@
                 fileSelect.setAttribute("type", "file");
 
                 fileSelect.addEventListener("change", async (e) => {
-                    var attachmentId = apiRequest("create-attachment", {name: fileSelect.files[0].name, type: fileSelect.files[0].type});
-                    
+                    var attachmentId = apiRequest("create-attachment", {name: fileSelect.files[0].name, type: fileSelect.files[0].type, size: fileSelect.files[0].size});
                     if (attachmentId.status != 0) return;
+
+                    console.log("zzz");
+
+                    attachmentsContainer.innerHTML += `
+                        <div id="${attachmentId.attachment}" class="file-attachment" onclick="removeAttachment(${attachmentId.attachment});">
+                            <i class="icon bx bx-file-blank"></i>
+                            <span class="file-attachment-name">Загрузка (0%)</span>
+                            <span class="file-attachment-size">0 Б</span>
+                            <span class="file-attachment-type">${fileSelect.files[0].type}</span>
+                        </div>
+                    `;
+
+                    var attachment = document.getElementById(attachmentId.attachment.toString());
+
+                    var fileName = attachment.getElementsByClassName("file-attachment-name")[0];
+                    var fileSize = attachment.getElementsByClassName("file-attachment-size")[0];
+                    var fileType = attachment.getElementsByClassName("file-attachment-type")[0];
 
                     var file = fileSelect.files[0];
                     var chunkCount = Math.ceil(file.size / attachmentChunkSize);
@@ -211,12 +242,25 @@
                             is_final: + (i == chunkCount-1)
                         }, 
                         "POST", true);
+
+                        fileName.innerText = `Загрузка (${(i / (chunkCount - 1)) * 100}%)`;
                     }
+                    fileName.innerText = fileSelect.files[0].name;
+                    fileSize.innerText = sizeToString(fileSelect.files[0].size);
 
                     filesToUpload.push(attachmentId.attachment);
                 });
                 
                 fileSelect.click();
+            }
+
+            function removeAttachment(id) {
+                var index = filesToUpload.indexOf(id);
+                if (id !== -1) 
+                    filesToUpload.splice(index, 1);
+
+                var el = document.getElementById(id.toString());
+                el.remove();
             }
 
             function uploadPost(e) {
@@ -225,7 +269,7 @@
 
                 if (form.content.value.length == 0) return;
 
-                apiRequest("upload-post", {content: form.content.value}, "POST", true);
+                apiRequest("upload-post", {content: form.content.value, attachments: JSON.stringify(filesToUpload)}, "POST", true);
 
                 document.location = "?u=me";
                 
@@ -336,19 +380,39 @@
                 user = apiRequest("get-user", {id: userId.user_id}).data;
                 userPosts = apiRequest("get-user-posts", {username: user.username, from: 0, count: Number.MAX_SAFE_INTEGER}).data;
 
-                for (var i = 0;i < userPosts.length; i++) {
+                for (var i = 0; i < userPosts.length; i++) {
                     var post = userPosts[i];
+                    
+                    var attachments = JSON.parse(post.attachments);
+                    var attachmentsHTML = "";
+
+                    for (var j = 0; j < attachments.length; j++) {
+                        var attachment = attachments[j];
+                        var attachmentData = apiRequest("get-attachment-data", {attachment: attachment});
+                        attachmentsHTML += `
+                        <div class="file-attachment" onclick="window.location = '${attachmentData.data.path}';">
+                            <i class="icon bx bx-file-blank"></i>
+                            <span class="file-attachment-name">${attachmentData.data.name}</span>
+                            <span class="file-attachment-size">${sizeToString(attachmentData.data.size)}</span>
+                            <span class="file-attachment-type">${attachmentData.data.mime_type}</span>
+                        </div>
+                        `;
+                    }
+
                     postsContainer.innerHTML += `
-                    <div id="post-`+post.id.toString()+`" class="post">
+                    <div id="post-${post.id}" class="post">
                         <div class="post-header">
                             <img class="user-avatar" src="data/test-ava.png" width="32px" height="32px">
-                            <a href="?u=`+user.username+`" class="post-user-nickname">`+user.display_name+`</a>
-                            <p class="post-user-name">`+user.username+`</p>
+                            <a href="?u=${user.username}" class="post-user-nickname">${user.display_name}</a>
+                            <p class="post-user-name">${user.username}</p>
                         </div>
-                        <p class="post-content">`+post.content+`</p>
+                        <p class="post-content">${post.content}</p>
+                        <div class="file-attachments">
+                            ${attachmentsHTML}
+                        </div>
                         <div class="post-toolbar">
-                            <button id="like-`+post.id.toString()+`" onclick="like(`+post.id.toString()+`);" class="counter-btn"><i class="icon-small bx `+(likes.includes(post.id) ? "bxs-like" : "bx-like")+`"></i> `+post.likes.toString()+`</button>
-                            <button id="dislike-`+post.id.toString()+`" onclick="dislike(`+post.id.toString()+`);"class="counter-btn"><i class="icon-small bx `+(dislikes.includes(post.id) ? "bxs-dislike" : "bx-dislike")+`"></i> `+post.dislikes.toString()+`</button>
+                            <button id="like-${post.id}" onclick="like(${post.id});" class="counter-btn"><i class="icon-small bx ${likes.includes(post.id) ? "bxs-like" : "bx-like"}"></i> ${post.likes}</button>
+                            <button id="dislike-${post.id}" onclick="dislike(${post.id});"class="counter-btn"><i class="icon-small bx ${dislikes.includes(post.id) ? "bxs-dislike" : "bx-dislike"}"></i> ${post.dislikes}</button>
                             <!--button class="counter-btn"><i class="icon-small bx bx-comment"></i> 0</button>
                             <button class="ellipsis-btn"><i class="icon-small bx bx-dots-vertical-rounded"></i></button-->
                         </div>
@@ -373,16 +437,16 @@
                     else user = userReq.data;
                     
                     postsContainer.innerHTML += `
-                    <div id="post_`+post.id.toString()+`" class="post">
+                    <div id="post-${post.id}" class="post">
                         <div class="post-header">
                             <img class="user-avatar" src="data/test-ava.png" width="32px" height="32px">
-                            <a href="?u=`+user.username+`" class="post-user-nickname">`+user.display_name+`</a>
-                            <p class="post-user-name">`+user.username+`</p>
+                            <a href="?u=${user.username}" class="post-user-nickname">${user.display_name}</a>
+                            <p class="post-user-name">${user.username}</p>
                         </div>
-                        <p class="post-content">`+post.content+`</p>
+                        <p class="post-content">${post.content}</p>
                         <div class="post-toolbar">
-                            <button id="like-`+post.id.toString()+`" onclick="like(`+post.id.toString()+`);" class="counter-btn"><i class="icon-small bx `+(likes.includes(post.id) ? "bxs-like" : "bx-like")+`"></i> `+post.likes.toString()+`</button>
-                            <button id="dislike-`+post.id.toString()+`" onclick="dislike(`+post.id.toString()+`);" class="counter-btn"><i class="icon-small bx `+(dislikes.includes(post.id) ? "bxs-dislike" : "bx-dislike")+`"></i> `+post.dislikes.toString()+`</button>
+                            <button id="like-${post.id}" onclick="like(${post.id});" class="counter-btn"><i class="icon-small bx ${likes.includes(post.id) ? "bxs-like" : "bx-like"}"></i> ${post.likes}</button>
+                            <button id="dislike-${post.id}" onclick="dislike(${post.id});"class="counter-btn"><i class="icon-small bx ${dislikes.includes(post.id) ? "bxs-dislike" : "bx-dislike"}"></i> ${post.dislikes}</button>
                             <!--button class="counter-btn"><i class="icon-small bx bx-comment"></i> 0</button>
                             <button class="ellipsis-btn"><i class="icon-small bx bx-dots-vertical-rounded"></i></button-->
                         </div>

@@ -5,6 +5,7 @@
     header("Content-Type: application/json");
 
     $content = db_escape_string($_POST["content"]);
+    $attachments = db_escape_string(isset($_POST["attachments"]) ? $_POST["attachments"] : "[]");
 
     $user = api_request("get-user-by-session", []);
 
@@ -17,7 +18,7 @@
         die();
     }
 
-    $q = $db->query("INSERT INTO `posts` VALUES (NULL, ".$user["user_id"].", '$content', '', 0, 0)");
+    $q = $db->query("INSERT INTO `posts` VALUES (NULL, ".$user["user_id"].", '$content', '$attachments', 0, 0)");
 
     $response = [
         "status" => 0

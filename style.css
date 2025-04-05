@@ -192,11 +192,18 @@ textarea:active {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding-bottom: 5px;
+    padding: 10px;
+    border-radius: 10px;
+    /*padding-bottom: 5px;*/
+}
+
+.file-attachment:hover {
+    cursor: pointer;
+    background-color: var(--btn-hover-color);
 }
 
 .file-attachment-name {
-    font-size: larger;
+    font-size: large;
     font-weight: 600;
 
     color: var(--text-color);
