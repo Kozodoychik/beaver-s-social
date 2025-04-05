@@ -243,7 +243,7 @@
                         }, 
                         "POST", true);
 
-                        fileName.innerText = `Загрузка (${(i / (chunkCount - 1)) * 100}%)`;
+                        fileName.innerHTML = `Загрузка (${(i / (chunkCount - 1)) * 100}%)`;
                     }
                     fileName.innerText = fileSelect.files[0].name;
                     fileSize.innerText = sizeToString(fileSelect.files[0].size);
@@ -402,7 +402,7 @@
                         var attachment = attachments[j];
                         var attachmentData = apiRequest("get-attachment-data", {attachment: attachment});
                         attachmentsHTML += `
-                        <div class="file-attachment" onclick="downloadAttachment('${attachmentData.data.id}');">
+                        <div class="file-attachment" onclick="downloadAttachment(${attachmentData.data.id});">
                             <i class="icon bx bx-file-blank"></i>
                             <span class="file-attachment-name">${attachmentData.data.name}</span>
                             <span class="file-attachment-size">${sizeToString(attachmentData.data.size)}</span>
@@ -447,7 +447,7 @@
                         var attachment = attachments[j];
                         var attachmentData = apiRequest("get-attachment-data", {attachment: attachment});
                         attachmentsHTML += `
-                        <div class="file-attachment" onclick="downloadAttachment('${attachmentData.data.id}');">
+                        <div class="file-attachment" onclick="downloadAttachment(${attachmentData.data.id});">
                             <i class="icon bx bx-file-blank"></i>
                             <span class="file-attachment-name">${attachmentData.data.name}</span>
                             <span class="file-attachment-size">${sizeToString(attachmentData.data.size)}</span>
