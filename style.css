@@ -224,6 +224,8 @@ textarea:active {
 .audio-player {
     display: flex;
     flex-direction: column;
+
+    width: 100%;
 }
 
 input[type="text"], input[type="password"] {
