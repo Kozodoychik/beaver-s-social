@@ -221,6 +221,11 @@ textarea:active {
     width: 20vw;
 }
 
+.audio-player {
+    display: flex;
+    flex-direction: column;
+}
+
 input[type="text"], input[type="password"] {
     padding: 10px;
     background-color: var(--box-color);

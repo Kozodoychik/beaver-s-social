@@ -110,6 +110,10 @@
             var dislikes = [];
 
             var filesToUpload = [];
+
+            var audio = new Audio();
+            var currentlyPlaying = -1;
+            var currentPlayTime = 0;
             
             function apiRequest(method, params, reqMethod="GET", useMultipartFormData=false) {
                 var p = new URLSearchParams(params);
@@ -371,6 +375,72 @@
                 }
             }
 
+            function playAudioAttachment(id) {
+                var attachment = apiRequest("get-attachment-data", {attachment: id});
+
+                if (attachment.status != 0) return;
+
+                var playBtn = document.getElementById(`player-btn-${id}`);
+
+                if (id == currentlyPlaying) {
+                    if (audio.paused) {
+                        audio.currentTime = currentPlayTime;
+                        audio.play();
+                        playBtn.classList.remove("bx-play");
+                        playBtn.classList.add("bx-pause");
+                        return;
+                    }
+                    currentPlayTime = audio.currentTime;
+                    audio.pause();
+                    playBtn.classList.remove("bx-pause");
+                    playBtn.classList.add("bx-play");
+                }
+                else {
+                    if (currentlyPlaying != -1) {
+                        var prevPlayerBtn = document.getElementById(`player-btn-${currentlyPlaying}`);
+                    
+                        prevPlayerBtn.classList.remove("bx-pause");
+                        prevPlayerBtn.classList.add("bx-play");
+
+                        var prevTimeSlider = prevPlayerBtn.parentElement.getElementsByTagName("input")[0];
+                        prevTimeSlider.remove();
+                    }
+
+                    playBtn.classList.remove("bx-play");
+                    playBtn.classList.add("bx-pause");
+
+                    audio.src = attachment.data.path;
+
+                    var timeSlider = document.createElement("input");
+                    timeSlider.setAttribute("type", "range");
+                    timeSlider.value = 0;
+
+                    audio.play();
+
+                    audio.ondurationchange = (e) => {
+                        timeSlider.max = audio.duration;
+                        playBtn.parentElement.getElementsByClassName("audio-player")[0].appendChild(timeSlider);
+                    }
+
+                    audio.ontimeupdate = (e) => {
+                        timeSlider.value = audio.currentTime;
+                    }
+
+                    audio.onended = (e) => {
+                        playBtn.classList.remove("bx-pause");
+                        playBtn.classList.add("bx-play");
+                    }
+
+                    timeSlider.oninput = (e) => {
+                        audio.currentTime = timeSlider.value;
+                        currentPlayTime = timeSlider.value;
+                    }
+
+                    currentlyPlaying = id;
+                    currentPlayTime = 0;
+                }
+            }
+
             if (urlParams.has("u")) {
                 var username = urlParams.get("u");
                 var user = [];
@@ -401,14 +471,28 @@
                     for (var j = 0; j < attachments.length; j++) {
                         var attachment = attachments[j];
                         var attachmentData = apiRequest("get-attachment-data", {attachment: attachment});
-                        attachmentsHTML += `
-                        <div class="file-attachment" onclick="downloadAttachment(${attachmentData.data.id});">
-                            <i class="icon bx bx-file-blank"></i>
-                            <span class="file-attachment-name">${attachmentData.data.name}</span>
-                            <span class="file-attachment-size">${sizeToString(attachmentData.data.size)}</span>
-                            <span class="file-attachment-type">${attachmentData.data.mime_type}</span>
-                        </div>
-                        `;
+
+                        if (attachmentData.data.mime_type.split("/")[0] == "audio") {
+                            attachmentsHTML += `
+                            <div class="file-attachment">
+                                <i id="player-btn-${attachmentData.data.id}" class='icon bx bx-play' onclick="playAudioAttachment(${attachmentData.data.id});"></i>
+                                <i class='icon bx bxs-download' onclick="downloadAttachment(${attachmentData.data.id});"></i>
+                                <div class="audio-player">
+                                    <span class="file-attachment-name">${attachmentData.data.name}</span>
+                                </div>
+                            </div>
+                            `;
+                        }
+                        else {
+                            attachmentsHTML += `
+                            <div class="file-attachment" onclick="downloadAttachment(${attachmentData.data.id});">
+                                <i class="icon bx bx-file-blank"></i>
+                                <span class="file-attachment-name">${attachmentData.data.name}</span>
+                                <span class="file-attachment-size">${sizeToString(attachmentData.data.size)}</span>
+                                <span class="file-attachment-type">${attachmentData.data.mime_type}</span>
+                            </div>
+                            `;   
+                        }
                     }
 
                     postsContainer.innerHTML += `
