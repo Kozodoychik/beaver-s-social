@@ -13,6 +13,7 @@
 html, body {
     min-height: 100%;
     background-color: var(--bg-color);
+    overflow-wrap: anywhere;
 }
 
 html {
@@ -221,10 +222,9 @@ textarea:active {
     width: 20vw;
 }
 
-.audio-player {
+.file-attachment-info {
     display: flex;
     flex-direction: column;
-
     width: 100%;
 }
 

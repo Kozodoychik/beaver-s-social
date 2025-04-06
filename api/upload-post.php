@@ -7,6 +7,9 @@
     $content = db_escape_string($_POST["content"]);
     $attachments = db_escape_string(isset($_POST["attachments"]) ? $_POST["attachments"] : "[]");
 
+    // Попытка защиты от XSS-уязвимости
+    $content = htmlentities($content);
+
     $user = api_request("get-user-by-session", []);
 
     if ($user["status"] != 0) {

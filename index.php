@@ -419,7 +419,7 @@
 
                     audio.ondurationchange = (e) => {
                         timeSlider.max = audio.duration;
-                        playBtn.parentElement.getElementsByClassName("audio-player")[0].appendChild(timeSlider);
+                        playBtn.parentElement.getElementsByClassName("file-attachment-info")[0].appendChild(timeSlider);
                     }
 
                     audio.ontimeupdate = (e) => {
@@ -478,7 +478,7 @@
                             <div class="file-attachment">
                                 <i id="player-btn-${attachmentData.data.id}" class='icon bx bx-play' onclick="playAudioAttachment(${attachmentData.data.id});"></i>
                                 <i class='icon bx bxs-download' onclick="downloadAttachment(${attachmentData.data.id});"></i>
-                                <div class="audio-player">
+                                <div class="file-attachment-info">
                                     <span class="file-attachment-name">${attachmentData.data.name}</span>
                                 </div>
                             </div>
@@ -488,9 +488,11 @@
                             attachmentsHTML += `
                             <div class="file-attachment" onclick="downloadAttachment(${attachmentData.data.id});">
                                 <i class="icon bx bx-file-blank"></i>
-                                <span class="file-attachment-name">${attachmentData.data.name}</span>
-                                <span class="file-attachment-size">${sizeToString(attachmentData.data.size)}</span>
-                                <span class="file-attachment-type">${attachmentData.data.mime_type}</span>
+                                <div class="file-attachment-info">
+                                    <span class="file-attachment-name">${attachmentData.data.name}</span>
+                                    <span class="file-attachment-size">${sizeToString(attachmentData.data.size)}</span>
+                                    <span class="file-attachment-type">${attachmentData.data.mime_type}</span>
+                                </div>
                             </div>
                             `;   
                         }
@@ -531,13 +533,13 @@
                     for (var j = 0; j < attachments.length; j++) {
                         var attachment = attachments[j];
                         var attachmentData = apiRequest("get-attachment-data", {attachment: attachment});
-                        
+
                         if (attachmentData.data.mime_type.split("/")[0] == "audio") {
                             attachmentsHTML += `
                             <div class="file-attachment">
                                 <i id="player-btn-${attachmentData.data.id}" class='icon bx bx-play' onclick="playAudioAttachment(${attachmentData.data.id});"></i>
                                 <i class='icon bx bxs-download' onclick="downloadAttachment(${attachmentData.data.id});"></i>
-                                <div class="audio-player">
+                                <div class="file-attachment-info">
                                     <span class="file-attachment-name">${attachmentData.data.name}</span>
                                 </div>
                             </div>
@@ -547,9 +549,11 @@
                             attachmentsHTML += `
                             <div class="file-attachment" onclick="downloadAttachment(${attachmentData.data.id});">
                                 <i class="icon bx bx-file-blank"></i>
-                                <span class="file-attachment-name">${attachmentData.data.name}</span>
-                                <span class="file-attachment-size">${sizeToString(attachmentData.data.size)}</span>
-                                <span class="file-attachment-type">${attachmentData.data.mime_type}</span>
+                                <div class="file-attachment-info">
+                                    <span class="file-attachment-name">${attachmentData.data.name}</span>
+                                    <span class="file-attachment-size">${sizeToString(attachmentData.data.size)}</span>
+                                    <span class="file-attachment-type">${attachmentData.data.mime_type}</span>
+                                </div>
                             </div>
                             `;   
                         }

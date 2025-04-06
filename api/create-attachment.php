@@ -31,6 +31,9 @@
     $mime_type = db_escape_string($_GET["type"]);
     $size = intval($_GET["size"]);
 
+    // Попытка защиты от XSS-уязвимости
+    $name = htmlentities($name);
+
     $internal_filename = strval(time());
 
     if ($config["db_use_sqlite3"])
