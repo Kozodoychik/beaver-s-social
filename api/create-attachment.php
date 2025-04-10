@@ -38,15 +38,16 @@
 
     if ($config["db_use_sqlite3"])
         $query = $db->query("INSERT INTO `attachments` VALUES (NULL, ".$user["user_id"].", '$mime_type', '$name', $size, '/data/$internal_filename') RETURNING id");
-    else
+    else {
         $db->query("INSERT INTO `attachments` VALUES (NULL, ".$user["user_id"].", '$mime_type', '$name', $size, '/data/$internal_filename')");
         $query = $db->query("SELECT LAST_INSERT_ID()");
+    }
     
     $id = db_fetch_assoc($query);
 
     $response = [
         "status" => 0,
-        "attachment" => intval($id["LAST_INSERT_ID()"])
+        "attachment" => intval(isset($id["LAST_INSERT_ID()"]) ? $id["LAST_INSERT_ID()"] : $id["id"])
     ];
 
     echo json_encode($response);
