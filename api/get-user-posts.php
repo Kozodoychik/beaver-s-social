@@ -1,6 +1,7 @@
 <?php
     include "database.php";
     include "api.php";
+    include "status-codes.php";
 
     header("Content-Type: application/json");
 
@@ -10,7 +11,7 @@
 
     $id = api_request("get-id-by-username", array("username"=>$username));
     
-    if ($id["status"] != 0) {
+    if ($id["status"] != API_OK) {
         echo json_encode($id);
         die();
     }
@@ -27,7 +28,7 @@
     }
 
     $response = [
-        "status" => $data ? 0 : 1,
+        "status" => API_OK,
         "data" => $data ? $data : array()
     ];
 

@@ -1,24 +1,21 @@
 <?php
     include "database.php";
     include "api.php";
+    include "status-codes.php";
 
     header("Content-Type: application/json");
 
     $user = api_request("get-user-by-session", []);
 
-    if ($user["status"] != 0) {
-        $response = [
-            "status" => 1
-        ];
-    
-        echo json_encode($response);
+    if ($user["status"] != API_OK) {
+        echo json_encode($user);
         die();
     }
 
     $db->query("DELETE FROM `sessions` WHERE id='".$_COOKIE["bs_session"]."'");
 
     $response = [
-        "status" => 0
+        "status" => API_OK
     ];
 
     echo json_encode($response);

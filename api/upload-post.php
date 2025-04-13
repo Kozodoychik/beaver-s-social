@@ -1,6 +1,7 @@
 <?php
     include "database.php";
     include "api.php";
+    include "status-codes.php";
 
     header("Content-Type: application/json");
 
@@ -12,9 +13,9 @@
 
     $user = api_request("get-user-by-session", []);
 
-    if ($user["status"] != 0) {
+    if ($user["status"] != API_OK) {
         $response = [
-            "status" => 2
+            "status" => API_INVALID_SESSION
         ];
 
         echo json_encode($response);
@@ -24,7 +25,7 @@
     $q = $db->query("INSERT INTO `posts` VALUES (NULL, ".$user["user_id"].", '$content', '$attachments', 0, 0)");
 
     $response = [
-        "status" => 0
+        "status" => API_OK
     ];
     
     echo json_encode($response);

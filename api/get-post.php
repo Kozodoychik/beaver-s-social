@@ -1,5 +1,6 @@
 <?php
     include "database.php";
+    include "status-codes.php";
 
     header("Content-Type: application/json");
 
@@ -10,7 +11,7 @@
     
     if (!$post) {
         $response = [
-            "status" => 1
+            "status" => API_POST_DOESNT_EXISTS
         ];
         echo json_encode($response);
         die();
@@ -23,7 +24,7 @@
     $post["dislikes"] = intval($post["dislikes"]);
 
     $response = [
-        "status" => 0,
+        "status" => API_OK,
         "data" => $post
     ];
     echo json_encode($response);

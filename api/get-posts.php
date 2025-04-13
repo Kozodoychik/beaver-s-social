@@ -1,5 +1,6 @@
 <?php
     include "database.php";
+    include "status-codes.php";
 
     header("Content-Type: application/json");
 
@@ -18,7 +19,7 @@
     }
 
     $response = [
-        "status" => 0,
+        "status" => API_OK,
         "data" => $posts
     ];
 

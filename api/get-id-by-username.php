@@ -1,5 +1,6 @@
 <?php
     include "database.php";
+    include "status-codes.php";
 
     header("Content-Type: application/json");
 
@@ -10,14 +11,14 @@
 
     if (!$data) {
         $response = [
-            "status" => 1
+            "status" => API_USER_DOESNT_EXISTS
         ];
         echo json_encode($response);
         die();
     }
 
     $response = [
-        "status" => 0,
+        "status" => API_OK,
         "user_id" => $data["id"]
     ];
 

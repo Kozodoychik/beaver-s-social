@@ -2,12 +2,13 @@
     include "database.php";
     include "api.php";
     include "config.php";
+    include "status-codes.php";
 
     header("Content-Type: application/json");
 
     $session_id = $_COOKIE["bs_session"];
     
-    $user = api_request("get-user-by-session", ["session"=>$session_id]);
+    $user = api_request("get-user-by-session", []);
 
     if ($user["status"] != 0) {
         $response = [
@@ -20,7 +21,7 @@
 
     if (!isset($_GET["name"]) || !isset($_GET["type"])) {
         $response = [
-            "status" => 1
+            "status" => API_INVALID_PARAMS
         ];
 
         echo json_encode($response);
@@ -36,18 +37,14 @@
 
     $internal_filename = strval(time());
 
-    if ($config["db_use_sqlite3"])
-        $query = $db->query("INSERT INTO `attachments` VALUES (NULL, ".$user["user_id"].", '$mime_type', '$name', $size, '/data/$internal_filename') RETURNING id");
-    else {
-        $db->query("INSERT INTO `attachments` VALUES (NULL, ".$user["user_id"].", '$mime_type', '$name', $size, '/data/$internal_filename')");
-        $query = $db->query("SELECT LAST_INSERT_ID()");
-    }
-    
+    $db->query("INSERT INTO `attachments` VALUES (NULL, ".$user["user_id"].", '$mime_type', '$name', $size, 'data/$internal_filename')");
+
+    $query = $db->query("SELECT MAX(id) FROM `attachments`");
     $id = db_fetch_assoc($query);
 
     $response = [
-        "status" => 0,
-        "attachment" => intval(isset($id["LAST_INSERT_ID()"]) ? $id["LAST_INSERT_ID()"] : $id["id"])
+        "status" => API_OK,
+        "attachment" => intval(($id["MAX(id)"]))
     ];
 
     echo json_encode($response);

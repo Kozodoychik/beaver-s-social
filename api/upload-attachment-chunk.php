@@ -1,6 +1,7 @@
 <?php
     include "database.php";
     include "api.php";
+    include "status-codes.php";
 
     header("Content-Type: application/json");
 
@@ -10,31 +11,23 @@
     $is_final = boolval($_POST["is_final"]);
 
 
-    $user = api_request("get-user-by-session", ["session"=>$session_id]);
+    $user = api_request("get-user-by-session", []);
 
-    if ($user["status"] != 0) {
-        $response = [
-            "status" => $user["status"]
-        ];
-
-        echo json_encode($response);
+    if ($user["status"] != API_OK) {
+        echo json_encode($user);
         die();
     }
 
     $attachment = api_request("get-attachment-data", ["attachment"=>$attachment_id]);
-    if ($attachment["status"] != 0) {
-        $response = [
-            "status" => $attachment["status"]
-        ];
-
-        echo json_encode($response);
+    if ($attachment["status"] != API_OK) {
+        echo json_encode($attachment);
         die();
     }
 
     move_uploaded_file($_FILES["data"]["tmp_name"], "../data/tmp/$attachment_id.$chunk_n");
 
     if ($is_final) {
-        $file = fopen("..".$attachment["data"]["path"], "a");
+        $file = fopen("../".$attachment["data"]["path"], "a");
         $chunks = glob("../data/tmp/$attachment_id.*");
         sort($chunks, SORT_NATURAL);
 
@@ -47,7 +40,7 @@
     }
 
     $response = [
-        "status" => 0
+        "status" => API_OK
     ];
 
     echo json_encode($response);

@@ -1,5 +1,6 @@
 <?php
     include "database.php";
+    include "status-codes.php";
 
     header("Content-Type: application/json");
 
@@ -17,7 +18,7 @@
         setcookie("bs_session", strval($session_id), 0, "/");
 
         $response = [
-            "status" => 0,
+            "status" => API_OK,
             "session_id" => $session_id
         ];
 

@@ -1,5 +1,6 @@
 <?php
     include "database.php";
+    include "status-codes.php";
 
     header("Content-Type: application/json");
 
@@ -12,7 +13,7 @@
 
     if (!$session) {
         $response = [
-            "status" => 1
+            "status" => API_INVALID_SESSION
         ];
 
         echo json_encode($response);
@@ -20,7 +21,7 @@
     }
 
     $response = [
-        "status" => 0,
+        "status" => API_OK,
         "user_id" => $session["user_id"]
     ];
 

@@ -1,6 +1,7 @@
 <?php
     include "database.php";
     include "api.php";
+    include "status-codes.php";
 
     header("Content-Type: application/json");
 
@@ -9,7 +10,7 @@
 
     if ($username == "me") {
         $response = [
-            "status" => 1,
+            "status" => API_INVALID_PARAMS,
         ];
         echo json_encode($response);
         die();
@@ -20,19 +21,19 @@
 
     if ($user) {
         $response = [
-            "status" => 2,
+            "status" => API_USER_EXISTS,
         ];
         echo json_encode($response);
         die();
     }
 
-    $db->query("INSERT INTO `users` VALUES (NULL, '$username', '$password', '$username', '', '[]', '[]')");
+    $db->query("INSERT INTO `users` VALUES (NULL, '$username', '$password', '$username', 'data/default_avatar.png', '[]', '[]')");
 
     //setcookie("bs_session", strval($session_id), 0, "/");
     api_request("auth", ["username"=>$username, "password"=>$password], "POST");
 
     $response = [
-        "status" => 0,
+        "status" => API_OK,
     ];
 
     echo json_encode($response);
