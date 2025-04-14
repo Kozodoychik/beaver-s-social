@@ -1,3 +1,5 @@
+api/database.db
+
 data/*
 data/tmp/*
 data/avatars/*
