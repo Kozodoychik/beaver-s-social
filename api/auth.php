@@ -27,7 +27,7 @@
     }
 
     $response = [
-        "status" => 1
+        "status" => API_INVALID_USERNAME_OR_PASSWORD
     ];
 
     echo json_encode($response);

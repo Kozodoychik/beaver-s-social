@@ -283,6 +283,21 @@ function updateAvatar() {
     fileSelect.click();
     fileSelect.remove();
 }
+function changeNickame(e) {
+    var parent = e.target.parentElement;
+    var input = document.createElement("input");
+    input.classList.add("user-nickname");
+
+    input.value = e.target.innerText;
+    parent.replaceChild(input, e.target);
+
+    input.addEventListener("change", (e) => {
+        console.log(input.value);
+        apiRequest("update-nickname", {new_name: input.value});
+        window.location.reload();
+    })
+
+}
 if (urlParams.has("u")) {
     var username = urlParams.get("u");
     var user = [];
@@ -293,8 +308,7 @@ if (urlParams.has("u")) {
             document.location = "login.php";
         }
         
-        var sessionId = getCookie("bs_session");
-        userId = apiRequest("get-user-by-session", {session: sessionId});
+        userId = apiRequest("get-user-by-session");
     }
     else {
         userId = apiRequest("get-id-by-username", {username: username});

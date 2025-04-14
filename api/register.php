@@ -8,7 +8,7 @@
     $username = db_escape_string($_POST["username"]);
     $password = db_escape_string($_POST["password"]);
 
-    if ($username == "me") {
+    if ($username == "me" || preg_replace('/[A-Za-z0-9]+/', "", $username)) {
         $response = [
             "status" => API_INVALID_PARAMS,
         ];

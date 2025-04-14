@@ -63,7 +63,7 @@
                         <div class="user-info">
                             <img class="user-avatar '.($_GET["u"] == "me" ? "pointer-on-hover" : "").'" src="'.$u["data"]["avatar_file"].'" onclick="updateAvatar();" width="64px" height="64px">
                             <div class="usernames-container">
-                                <p class="user-nickname">'.$u["data"]["display_name"].'</p>
+                                <p class="user-nickname" '.($_GET["u"] == "me" ? 'onclick="changeNickame(event);"' : "").'>'.$u["data"]["display_name"].'</p>
                                 <p class="user-name">'.$u["data"]["username"].'</p>
                             </div>
                         </div>

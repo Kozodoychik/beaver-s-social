@@ -5,7 +5,6 @@
 
     header("Content-Type: application/json");
 
-    $session_id = db_escape_string($_COOKIE["bs_session"]);
     $attachment_id = intval($_POST["attachment"]);
     $chunk_n = intval($_POST["chunk_n"]);
     $is_final = boolval($_POST["is_final"]);

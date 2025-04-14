@@ -5,7 +5,6 @@
 
     header("Content-Type: application/json");
 
-    $session = $_COOKIE["bs_session"];
     $user_id = api_request("get-user-by-session", []);
 
     if ($user_id["status"] != API_OK) {

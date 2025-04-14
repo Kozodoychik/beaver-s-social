@@ -265,6 +265,14 @@ input[type="submit"]:hover {
     cursor: pointer;
 }
 
+input.user-nickname {
+    width: 100%;
+}
+
+.post-user-name {
+    color: var(--text-color);
+}
+
 @media screen and (min-width: 900px) {
 
 body {

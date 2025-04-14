@@ -67,7 +67,7 @@
                     document.location = "index.php";
                     return;
                 }
-                else if (response.status == 1) {
+                else if (response.status == 7) {
                     loginError.innerHTML = "Неверное имя пользователя или пароль";
                     return;
                 }
@@ -77,7 +77,10 @@
                 var username = registerForm.elements.username;
                 var password = registerForm.elements.password;
 
-                console.log(username.value);
+                if (username.value.search(/[^a-zA-Z0-9]+/gm) !== -1) {
+                    registerError.innerHTML = "Имя пользователя должно содержать только латинские буквы и цифры!";
+                    return;
+                }
 
                 var req = await fetch("api/register.php", {
                     method: "post",
@@ -89,7 +92,7 @@
 
                 var response = await req.json();
                 
-                if (response.status == 2) {
+                if (response.status == 5) {
                     registerError.innerHTML = "Такой пользователь уже существует";
                     return;
                 }
@@ -111,7 +114,7 @@
                     return;
                 }
 
-                registerError.innerHTML += "Что-то пошло не так";
+                registerError.innerHTML = "Что-то пошло не так";
             }
 
             loginForm.addEventListener("submit", (e) => {
