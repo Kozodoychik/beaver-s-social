@@ -38,7 +38,7 @@
                 ?></li>
             </ul>
         </div>
-        <div class="posts">
+        <div id="posts">
             <?php
                 if (isset($_GET["u"])) {
                     if ($_GET["u"] == "me") {
@@ -86,6 +86,8 @@
                                 </div>
                                 <div id="form-attachments" class="file-attachments">
                                 </div>
+                                <div id="form-repost">
+                                </div>
                                 <div class="toolbar">
                                     <button onclick="uploadPost(event);" type="submit"><i class="icon bx bx-right-arrow-alt"></i></button>
                                     <button onclick="addAttachment(event);"><i class="icon bx bx-paperclip"></i></button>
@@ -94,8 +96,7 @@
                         </div>
                         ';
                     }
-                }
-                
+                }  
             ?>
         </div>
         <script src="main.js"></script>

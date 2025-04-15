@@ -4,7 +4,7 @@
 
     header("Content-Type: application/json");
 
-    $id = strval($_GET["id"]);
+    $id = intval($_GET["id"]);
 
     $post_q = $db->query("SELECT * FROM `posts` WHERE id=$id");
     $post = db_fetch_assoc($post_q);

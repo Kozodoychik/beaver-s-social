@@ -299,7 +299,7 @@ body {
     top: 70px;
 }
 
-.posts {
+#posts {
     width: 40vw;
     padding-inline: 50px;
 
@@ -356,6 +356,10 @@ body {
 
 }
 
+#form-repost, .repost {
+    margin: 10px;
+}
+
 
 @media screen and (max-width: 900px) {
 
@@ -364,7 +368,7 @@ body {
     padding-bottom: 50px;
 }
 
-.posts {
+#posts {
     display: flex;
     flex-direction: column;
     gap: 10px;

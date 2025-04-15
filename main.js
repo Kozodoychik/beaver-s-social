@@ -1,7 +1,7 @@
 var attachmentChunkSize = 8*1024*1024;    // 8 Мб
 var urlParams = new URLSearchParams(document.location.search);
 var posts = document.getElementsByClassName("posts")[0];
-var postsContainer = document.getElementsByClassName("posts")[0];
+var postsContainer = document.getElementById("posts");
 var likes = [];
 var dislikes = [];
 var filesToUpload = [];
@@ -144,10 +144,9 @@ function downloadAttachment(id) {
 function uploadPost(e) {
     var form = document.forms["post-form"];
     e.preventDefault();
-    if (form.content.value.length == 0) return;
-    apiRequest("upload-post", {content: form.content.value, attachments: JSON.stringify(filesToUpload)}, "POST", true);
+    if (form.content.value.length == 0 && filesToUpload.length == 0 && !urlParams.get("repost")) return;
+    apiRequest("upload-post", {content: form.content.value, attachments: JSON.stringify(filesToUpload), repost: (urlParams.get("repost") ? urlParams.get("repost") : -1)}, "POST", true);
     document.location = "?u=me";
-    
 }
 function like(id) {
     if (!loggedIn) return;
@@ -287,19 +286,109 @@ function updateAvatar() {
 }
 function changeNickame(e) {
     var parent = e.target.parentElement;
+    var oldNickname = e.target.innerText;
     var input = document.createElement("input");
     input.classList.add("user-nickname");
 
-    input.value = e.target.innerText;
+    input.value = oldNickname;
+    input.placeholder = oldNickname;
     parent.replaceChild(input, e.target);
 
     input.addEventListener("change", (e) => {
         console.log(input.value);
+        if (input.value == "")
+            input.value = oldNickname;
         apiRequest("update-nickname", {new_name: input.value});
         window.location.reload();
     })
-
 }
+
+function renderPost(user, post, parentElement, noToolbar=false) {
+    var attachments = JSON.parse(post.attachments);
+    var attachmentsHTML = "";
+    var imageAttachmentsHTML = "";
+
+    for (var j = 0; j < attachments.length; j++) {
+        var attachment = attachments[j];
+        var attachmentData = apiRequest("get-attachment-data", {attachment: attachment});
+
+        var mime_type = attachmentData.data.mime_type.split("/")
+
+        if (mime_type[0] == "audio") {
+            attachmentsHTML += `
+            <div class="file-attachment">
+                <i id="player-btn-${attachmentData.data.id}" class='icon bx bx-play' onclick="playAudioAttachment(${attachmentData.data.id});"></i>
+                <i class='icon bx bxs-download' onclick="downloadAttachment(${attachmentData.data.id});"></i>
+                <div class="file-attachment-info">
+                    <span class="file-attachment-name">${attachmentData.data.name}</span>
+                </div>
+            </div>
+            `;
+        }
+        else if (mime_type[0] == "image" || mime_type[0] == "video") {
+            imageAttachmentsHTML += `
+            <div class="file-attachment">
+                <${(mime_type[0] == "image" ? "img" : "video controls")} src="${attachmentData.data.path}" width="100%">
+            </div>
+            `;
+        }
+        else {
+            attachmentsHTML += `
+            <div class="file-attachment" onclick="downloadAttachment(${attachmentData.data.id});">
+                <i class="icon bx bx-file-blank"></i>
+                <div class="file-attachment-info">
+                    <span class="file-attachment-name">${attachmentData.data.name}</span>
+                    <span class="file-attachment-size">${sizeToString(attachmentData.data.size)}</span>
+                    <span class="file-attachment-type">${attachmentData.data.mime_type}</span>
+                </div>
+            </div>
+            `;   
+        }
+    }
+    parentElement.innerHTML += `
+    <div id="post-${post.id}" class="post">
+        <div class="post-header">
+            <img class="user-avatar" src="${user.avatar_file}" width="32px" height="32px">
+            <a href="?u=${user.username}" class="post-user-nickname">${user.display_name}</a>
+            <p class="post-user-name">${user.username}</p>
+        </div>
+        <p class="post-content">${post.content}</p>
+        <div class="image-attachments">
+            ${imageAttachmentsHTML}
+        </div>
+        <div class="file-attachments">
+            ${attachmentsHTML}
+        </div>
+        <div class="repost">
+        </div>
+        ${((noToolbar) ? `` : `
+        <div class="post-toolbar">
+            <button id="like-${post.id}" onclick="like(${post.id});" class="counter-btn"><i class="icon-small bx ${likes.includes(post.id) ? "bxs-like" : "bx-like"}"></i> ${post.likes}</button>
+            <button id="dislike-${post.id}" onclick="dislike(${post.id});"class="counter-btn"><i class="icon-small bx ${dislikes.includes(post.id) ? "bxs-dislike" : "bx-dislike"}"></i> ${post.dislikes}</button>
+            <button class="counter-btn"><a href="?u=me&repost=${post.id}"><i class='icon-small bx bx-repost'></i></a></button>
+            <button class="ellipsis-btn"><i class="icon-small bx bx-dots-vertical-rounded"></i></button-->
+        </div>`)
+        }
+    </div>
+    `;
+
+    if (post.repost > -1) {
+        var repostContainer = parentElement.children[`post-${post.id}`].getElementsByClassName("repost")[0];
+        renderRepost(post.repost, repostContainer);
+    }
+}
+
+
+function renderRepost(id, element) {
+    var post = apiRequest("get-post", {id: id});
+    if (post.status != 0) return;
+
+    var author = apiRequest("get-user", {id: post.data.author_id});
+    if (author.status != 0) return;
+
+    renderPost(author.data, post.data, element, true);
+}
+
 if (urlParams.has("u")) {
     var username = urlParams.get("u");
     var user = [];
@@ -310,6 +399,9 @@ if (urlParams.has("u")) {
         if (userId.status != 0) {
             document.location = "login.php";
         }
+        if (urlParams.get("repost")) {
+            renderRepost(urlParams.get("repost"), document.getElementById("form-repost"));
+        }
     }
     else {
         userId = apiRequest("get-id-by-username", {username: username});
@@ -318,144 +410,19 @@ if (urlParams.has("u")) {
     userPosts = apiRequest("get-user-posts", {username: user.username, from: 0, count: Number.MAX_SAFE_INTEGER}).data;
     for (var i = 0; i < userPosts.length; i++) {
         var post = userPosts[i];
-        
-        var attachments = JSON.parse(post.attachments);
-        var attachmentsHTML = "";
-        var imageAttachmentsHTML = "";
 
+        var attachments = JSON.parse(post.attachments);
         if (attachments.length == 0 && urlParams.get("filter") == "media") continue;
 
-        for (var j = 0; j < attachments.length; j++) {
-            var attachment = attachments[j];
-            var attachmentData = apiRequest("get-attachment-data", {attachment: attachment});
-            if (attachmentData.data.mime_type.split("/")[0] == "audio") {
-                attachmentsHTML += `
-                <div class="file-attachment">
-                    <i id="player-btn-${attachmentData.data.id}" class='icon bx bx-play' onclick="playAudioAttachment(${attachmentData.data.id});"></i>
-                    <i class='icon bx bxs-download' onclick="downloadAttachment(${attachmentData.data.id});"></i>
-                    <div class="file-attachment-info">
-                        <span class="file-attachment-name">${attachmentData.data.name}</span>
-                    </div>
-                </div>
-                `;
-            }
-            else if (attachmentData.data.mime_type.split("/")[0] == "image") {
-                imageAttachmentsHTML += `
-                <div class="file-attachment" onclick="downloadAttachment(${attachmentData.data.id});">
-                    <img src="${attachmentData.data.path}" width="100%">
-                </div>
-                `;
-            }
-            else {
-                attachmentsHTML += `
-                <div class="file-attachment" onclick="downloadAttachment(${attachmentData.data.id});">
-                    <i class="icon bx bx-file-blank"></i>
-                    <div class="file-attachment-info">
-                        <span class="file-attachment-name">${attachmentData.data.name}</span>
-                        <span class="file-attachment-size">${sizeToString(attachmentData.data.size)}</span>
-                        <span class="file-attachment-type">${attachmentData.data.mime_type}</span>
-                    </div>
-                </div>
-                `;   
-            }
-        }
-        postsContainer.innerHTML += `
-        <div id="post-${post.id}" class="post">
-            <div class="post-header">
-                <img class="user-avatar" src="${user.avatar_file}" width="32px" height="32px">
-                <a href="?u=${user.username}" class="post-user-nickname">${user.display_name}</a>
-                <p class="post-user-name">${user.username}</p>
-            </div>
-            <p class="post-content">${post.content}</p>
-            <div class="image-attachments">
-                ${imageAttachmentsHTML}
-            </div>
-            <div class="file-attachments">
-                ${attachmentsHTML}
-            </div>
-            <div class="post-toolbar">
-                <button id="like-${post.id}" onclick="like(${post.id});" class="counter-btn"><i class="icon-small bx ${likes.includes(post.id) ? "bxs-like" : "bx-like"}"></i> ${post.likes}</button>
-                <button id="dislike-${post.id}" onclick="dislike(${post.id});"class="counter-btn"><i class="icon-small bx ${dislikes.includes(post.id) ? "bxs-dislike" : "bx-dislike"}"></i> ${post.dislikes}</button>
-                <!--button class="counter-btn"><i class="icon-small bx bx-comment"></i> 0</button>
-                <button class="ellipsis-btn"><i class="icon-small bx bx-dots-vertical-rounded"></i></button-->
-            </div>
-        </div>
-        `;
+        renderPost(user, post, postsContainer);
     }
 }
 else {
     var posts = apiRequest("get-posts", {from: 0, count: Number.MAX_SAFE_INTEGER}).data;
     for (var i = 0;i < posts.length; i++) {
         var post = posts[i];
-        var user;
-        var userReq = apiRequest("get-user", {id: post.author_id});
-        var attachments = JSON.parse(post.attachments);
-        var attachmentsHTML = "";
-        var imageAttachmentsHTML = "";
-        for (var j = 0; j < attachments.length; j++) {
-            var attachment = attachments[j];
-            var attachmentData = apiRequest("get-attachment-data", {attachment: attachment});
-            if (attachmentData.data.mime_type.split("/")[0] == "audio") {
-                attachmentsHTML += `
-                <div class="file-attachment">
-                    <i id="player-btn-${attachmentData.data.id}" class='icon bx bx-play' onclick="playAudioAttachment(${attachmentData.data.id});"></i>
-                    <i class='icon bx bxs-download' onclick="downloadAttachment(${attachmentData.data.id});"></i>
-                    <div class="file-attachment-info">
-                        <span class="file-attachment-name">${attachmentData.data.name}</span>
-                    </div>
-                </div>
-                `;
-            }
-            else if (attachmentData.data.mime_type.split("/")[0] == "image") {
-                imageAttachmentsHTML += `
-                <div class="file-attachment" onclick="downloadAttachment(${attachmentData.data.id});">
-                    <img src="${attachmentData.data.path}" width="100%">
-                </div>
-                `;
-            }
-            else {
-                attachmentsHTML += `
-                <div class="file-attachment" onclick="downloadAttachment(${attachmentData.data.id});">
-                    <i class="icon bx bx-file-blank"></i>
-                    <div class="file-attachment-info">
-                        <span class="file-attachment-name">${attachmentData.data.name}</span>
-                        <span class="file-attachment-size">${sizeToString(attachmentData.data.size)}</span>
-                        <span class="file-attachment-type">${attachmentData.data.mime_type}</span>
-                    </div>
-                </div>
-                `;   
-            }
-        }
+        var user = apiRequest("get-user", {id: post.author_id});
         
-        if (userReq.status != 0) {
-            user = {
-                display_name: "Неизвестный пользователь",
-                username: "UnknownUser"
-            }
-        }
-        else user = userReq.data;
-        
-        postsContainer.innerHTML += `
-        <div id="post-${post.id}" class="post">
-            <div class="post-header">
-                <img class="user-avatar" src="${user.avatar_file}" width="32px" height="32px">
-                <a href="?u=${user.username}" class="post-user-nickname">${user.display_name}</a>
-                <p class="post-user-name">${user.username}</p>
-            </div>
-            <p class="post-content">${post.content}</p>
-            <div class="image-attachments">
-                ${imageAttachmentsHTML}
-            </div>
-            <div class="file-attachments">
-                ${attachmentsHTML}
-            </div>
-            <div class="post-toolbar">
-                <button id="like-${post.id}" onclick="like(${post.id});" class="counter-btn"><i class="icon-small bx ${likes.includes(post.id) ? "bxs-like" : "bx-like"}"></i> ${post.likes}</button>
-                <button id="dislike-${post.id}" onclick="dislike(${post.id});"class="counter-btn"><i class="icon-small bx ${dislikes.includes(post.id) ? "bxs-dislike" : "bx-dislike"}"></i> ${post.dislikes}</button>
-                <!--button class="counter-btn"><i class="icon-small bx bx-comment"></i> 0</button>
-                <button class="ellipsis-btn"><i class="icon-small bx bx-dots-vertical-rounded"></i></button-->
-            </div>
-        </div>
-        `;
+        renderPost(user.data, post, postsContainer);
     }
 }
