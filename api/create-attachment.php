@@ -42,7 +42,8 @@
 
     $response = [
         "status" => API_OK,
-        "attachment" => intval(($id["MAX(id)"]))
+        "attachment" => intval(($id["MAX(id)"])),
+        "path" => "data/$internal_filename"
     ];
 
     echo json_encode($response);

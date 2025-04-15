@@ -6,6 +6,15 @@
 
     //var_dump($_COOKIE);
 
+    if (!isset($_COOKIE["bs_session"])) {
+        $response = [
+            "status" => API_INVALID_SESSION
+        ];
+
+        echo json_encode($response);
+        die();
+    }
+
     $session = $_COOKIE["bs_session"];
 
     $sessions_q = $db->query("SELECT `user_id` FROM `sessions` WHERE id='$session'");

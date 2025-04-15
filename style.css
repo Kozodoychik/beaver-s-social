@@ -203,6 +203,11 @@ textarea:active {
     background-color: var(--btn-hover-color);
 }
 
+.image-attachments {
+    display: flex;
+    flex-wrap: wrap;
+}
+
 .file-attachment-name {
     font-size: large;
     font-weight: 600;

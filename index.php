@@ -68,9 +68,8 @@
                             </div>
                         </div>
                         <div class="user-sections-panel">
-                            <a class="section-btn-active" href="#">Всё</a>
-                            <a href="#">Медиа</a>
-                            <a href="#">Всякое</a>
+                            <a '.(isset($_GET["filter"]) ? '' : 'class="section-btn-active"').' href="?u='.$_GET["u"].'">Всё</a>
+                            <a '.(isset($_GET["filter"]) && $_GET["filter"] == "media" ? 'class="section-btn-active"' : '').'href="?u='.$_GET["u"].'&filter=media">Медиа</a>
                         </div>
                     </div>
                     ';
@@ -83,6 +82,8 @@
                         <div class="post">
                             <form id="post-form">
                                 <textarea form="post-form" name="content" placeholder="Чем вы хотите поделиться сегодня?" rows="5"></textarea>
+                                <div id="form-image-attachments" class="image-attachments">
+                                </div>
                                 <div id="form-attachments" class="file-attachments">
                                 </div>
                                 <div class="toolbar">

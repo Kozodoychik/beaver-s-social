@@ -8,6 +8,7 @@ var filesToUpload = [];
 var audio = new Audio();
 var currentlyPlaying = -1;
 var currentPlayTime = 0;
+var loggedIn = false;
 
 function apiRequest(method, params, reqMethod="GET", useMultipartFormData=false) {
     var p = new URLSearchParams(params);
@@ -45,25 +46,18 @@ function apiRequest(method, params, reqMethod="GET", useMultipartFormData=false)
     }
     return response;
 }
-function getCookie(name) {
-    var rows = document.cookie.split(";");
-    for (var i = 0; i < rows.length; i++) {
-        var row = rows[i];
-        var data = row.split("=")
-        if (data[0] == name) {
-            return data[1];
-        }
-    }
-}
-if (getCookie("bs_session")) {
-    var userId = apiRequest("get-user-by-session", {});
+
+var userId = apiRequest("get-user-by-session", {});
+if (userId.status == 0) {
     var user = apiRequest("get-user", {id:userId.user_id});
     likes = JSON.parse(user.data.likes);
     dislikes = JSON.parse(user.data.dislikes);
+    loggedIn = true;
 }
+
 function logout() {
     console.log(apiRequest("logout", {}));
-    document.cookie = "bs_session=; Max-Age=0; path=/; domain=" + location.host + ";expires=Thu, 01 Jan 1970 00:00:01 GMT";
+    document.cookie = "bs_session=; Max-Age=0; path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT";
     window.location = "?";
 }
 function sizeToString(size) {
@@ -85,13 +79,16 @@ function sizeToString(size) {
 function addAttachment(e) {
     e.preventDefault();
     var attachmentsContainer = document.getElementById("form-attachments");
+    var imageAttachmentsContainer = document.getElementById("form-image-attachments");
+
     var fileSelect = document.createElement("input");
     fileSelect.setAttribute("type", "file");
     fileSelect.addEventListener("change", async (e) => {
         var attachmentId = apiRequest("create-attachment", {name: fileSelect.files[0].name, type: fileSelect.files[0].type, size: fileSelect.files[0].size});
         if (attachmentId.status != 0) return;
         console.log("zzz");
-        attachmentsContainer.innerHTML += `
+        var c = (fileSelect.files[0].type.split("/")[0] == "image") ? imageAttachmentsContainer : attachmentsContainer;
+        c.innerHTML += `
             <div id="${attachmentId.attachment}" class="file-attachment" onclick="removeAttachment(${attachmentId.attachment});">
                 <i class="icon bx bx-file-blank"></i>
                 <span class="file-attachment-name">Загрузка (0%)</span>
@@ -118,7 +115,12 @@ function addAttachment(e) {
         }
         fileName.innerText = fileSelect.files[0].name;
         fileSize.innerText = sizeToString(fileSelect.files[0].size);
+        fileType.innerText = fileSelect.files[0].type;
         filesToUpload.push(attachmentId.attachment);
+
+        if (fileSelect.files[0].type.split("/")[0] == "image") {
+            attachment.innerHTML = `<img src="${attachmentId.path}" width="100%">`;
+        }
     });
     
     fileSelect.click();
@@ -148,7 +150,7 @@ function uploadPost(e) {
     
 }
 function like(id) {
-    if (!getCookie("bs_session")) return;
+    if (!loggedIn) return;
     var method = "PUT";
     if (likes.includes(id)) {
         method = "DELETE";
@@ -182,7 +184,7 @@ function like(id) {
     }
 }
 function dislike(id) {
-    if (!getCookie("bs_session")) return;
+    if (!loggedIn) return;
     var method = "PUT";
     if (dislikes.includes(id)) {
         method = "DELETE";
@@ -304,11 +306,10 @@ if (urlParams.has("u")) {
     var userId = [];
     var userPosts = [];
     if (username == "me") {
-        if (!getCookie("bs_session")) {
+        userId = apiRequest("get-user-by-session");
+        if (userId.status != 0) {
             document.location = "login.php";
         }
-        
-        userId = apiRequest("get-user-by-session");
     }
     else {
         userId = apiRequest("get-id-by-username", {username: username});
@@ -320,6 +321,10 @@ if (urlParams.has("u")) {
         
         var attachments = JSON.parse(post.attachments);
         var attachmentsHTML = "";
+        var imageAttachmentsHTML = "";
+
+        if (attachments.length == 0 && urlParams.get("filter") == "media") continue;
+
         for (var j = 0; j < attachments.length; j++) {
             var attachment = attachments[j];
             var attachmentData = apiRequest("get-attachment-data", {attachment: attachment});
@@ -331,6 +336,13 @@ if (urlParams.has("u")) {
                     <div class="file-attachment-info">
                         <span class="file-attachment-name">${attachmentData.data.name}</span>
                     </div>
+                </div>
+                `;
+            }
+            else if (attachmentData.data.mime_type.split("/")[0] == "image") {
+                imageAttachmentsHTML += `
+                <div class="file-attachment" onclick="downloadAttachment(${attachmentData.data.id});">
+                    <img src="${attachmentData.data.path}" width="100%">
                 </div>
                 `;
             }
@@ -355,6 +367,9 @@ if (urlParams.has("u")) {
                 <p class="post-user-name">${user.username}</p>
             </div>
             <p class="post-content">${post.content}</p>
+            <div class="image-attachments">
+                ${imageAttachmentsHTML}
+            </div>
             <div class="file-attachments">
                 ${attachmentsHTML}
             </div>
@@ -376,6 +391,7 @@ else {
         var userReq = apiRequest("get-user", {id: post.author_id});
         var attachments = JSON.parse(post.attachments);
         var attachmentsHTML = "";
+        var imageAttachmentsHTML = "";
         for (var j = 0; j < attachments.length; j++) {
             var attachment = attachments[j];
             var attachmentData = apiRequest("get-attachment-data", {attachment: attachment});
@@ -387,6 +403,13 @@ else {
                     <div class="file-attachment-info">
                         <span class="file-attachment-name">${attachmentData.data.name}</span>
                     </div>
+                </div>
+                `;
+            }
+            else if (attachmentData.data.mime_type.split("/")[0] == "image") {
+                imageAttachmentsHTML += `
+                <div class="file-attachment" onclick="downloadAttachment(${attachmentData.data.id});">
+                    <img src="${attachmentData.data.path}" width="100%">
                 </div>
                 `;
             }
@@ -420,6 +443,9 @@ else {
                 <p class="post-user-name">${user.username}</p>
             </div>
             <p class="post-content">${post.content}</p>
+            <div class="image-attachments">
+                ${imageAttachmentsHTML}
+            </div>
             <div class="file-attachments">
                 ${attachmentsHTML}
             </div>

@@ -11,7 +11,7 @@
         die();
     }
 
-    $db->query("UPDATE `users` SET `display_name`='$display_name'");
+    $db->query("UPDATE `users` SET `display_name`='$display_name' WHERE `id`=".$user_id["user_id"]);
 
     $response = [
         "status" => API_OK
