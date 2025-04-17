@@ -3,6 +3,8 @@
     include "api.php";
     include "status-codes.php";
 
+    header("Content-Type: application/json");
+
     $display_name = db_escape_string($_GET["new_name"]);
     $user_id = api_request("get-user-by-session", []);
 
