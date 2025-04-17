@@ -154,7 +154,7 @@ textarea:active {
     white-space: pre-wrap;
 }
 
-.counter-btn {
+.post-btn {
     color: var(--text-color);
     font-size: large;
 }
@@ -317,10 +317,6 @@ body {
     padding: 10px;
     background-color: var(--box-color);
     border-radius: 15px;
-}
-
-.ellipsis-btn {
-    float: right;
 }
 
 .nav-panel {
