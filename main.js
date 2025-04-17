@@ -363,9 +363,9 @@ function renderPost(user, post, parentElement, noToolbar=false) {
         </div>
         ${((noToolbar) ? `` : `
         <div class="post-toolbar">
-            <button id="like-${post.id}" onclick="like(${post.id});" class="counter-btn"><i class="icon-small bx ${likes.includes(post.id) ? "bxs-like" : "bx-like"}"></i> ${post.likes}</button>
-            <button id="dislike-${post.id}" onclick="dislike(${post.id});"class="counter-btn"><i class="icon-small bx ${dislikes.includes(post.id) ? "bxs-dislike" : "bx-dislike"}"></i> ${post.dislikes}</button>
-            <button class="counter-btn"><a href="?u=me&repost=${post.id}"><i class='icon-small bx bx-repost'></i></a></button>
+            <button id="like-${post.id}" onclick="like(${post.id});" class="post-btn"><i class="icon-small bx ${likes.includes(post.id) ? "bxs-like" : "bx-like"}"></i> ${post.likes}</button>
+            <button id="dislike-${post.id}" onclick="dislike(${post.id});"class="post-btn"><i class="icon-small bx ${dislikes.includes(post.id) ? "bxs-dislike" : "bx-dislike"}"></i> ${post.dislikes}</button>
+            <button class="post-btn"><a href="?u=me&repost=${post.id}"><i class='icon-small bx bx-repost'></i></a></button>
         </div>`)
         }
     </div>
